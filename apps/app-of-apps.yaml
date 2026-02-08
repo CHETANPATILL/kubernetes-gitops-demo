@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: git@github.com:CHETANPATILL/kubernetes-gitops-demo.git
+    targetRevision: main
+    path: apps
+    directory:
+      recurse: true       # Recursively scan for YAML files
+      jsonnet: {}
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd     # Applications go in argocd namespace
+  
+  syncPolicy:
+    automated:
+      prune: true         # Delete Applications removed from Git
+      selfHeal: true      # Revert manual changes
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
