@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  
+  source:
+    repoURL: 
+    targetRevision: main
+    path: manifests/demo-app/overlays/dev
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  
+  syncPolicy:
+    automated:
+      prune: true       # Delete resources not in Git
+      selfHeal: true    # Force sync if manual changes made
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Ignore differences that are expected
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas  # Ignore if HPA changes replicas
