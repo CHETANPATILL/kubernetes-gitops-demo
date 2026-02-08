@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-canary
+spec:
+  replicas: 5
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-canary
+  template:
+    metadata:
+      labels:
+        app: rollout-canary
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/stefanprodan/podinfo:6.5.4
+        ports:
+        - containerPort: 9898
+          name: http
+          protocol: TCP
+        env:
+        - name: PODINFO_UI_COLOR
+          value: "#34577c"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20      # 20% traffic to new version
+      - pause: {duration: 1m}
+      - setWeight: 40      # 40% traffic
+      - pause: {duration: 1m}
+      - setWeight: 60      # 60% traffic
+      - pause: {duration: 1m}
+      - setWeight: 80      # 80% traffic
+      - pause: {duration: 1m}
+      # Final: 100% traffic to new version

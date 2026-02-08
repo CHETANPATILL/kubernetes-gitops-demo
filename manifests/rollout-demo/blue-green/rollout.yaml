@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-bluegreen
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-bluegreen
+  template:
+    metadata:
+      labels:
+        app: rollout-bluegreen
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/stefanprodan/podinfo:6.5.4
+        ports:
+        - containerPort: 9898
+          name: http
+        env:
+        - name: PODINFO_UI_COLOR
+          value: "#0000FF"  # Blue
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+  strategy:
+    blueGreen:
+      activeService: rollout-bluegreen-active     # Production traffic
+      previewService: rollout-bluegreen-preview   # Test traffic (green)
+      autoPromotionEnabled: false                  # Manual promotion
+      scaleDownDelaySeconds: 30                    # Keep old version for 30s
