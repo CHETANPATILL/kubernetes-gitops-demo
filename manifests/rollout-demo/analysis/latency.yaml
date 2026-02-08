@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: latency-p95
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: latency
+    interval: 30s
+    count: 5
+    # P95 latency must be < 500ms
+    successCondition: result < 500
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus-operated.monitoring.svc:9090
+        query: |
+          histogram_quantile(0.95,
+            sum(
+              rate(
+                http_request_duration_seconds_bucket{
+                  service="{{ args.service-name }}"
+                }[5m]
+              )
+            ) by (le)
+          ) * 1000

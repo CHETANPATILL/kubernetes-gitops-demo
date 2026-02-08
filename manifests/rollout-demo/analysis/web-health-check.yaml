@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: web-health-check
+spec:
+  args:
+  - name: service-url
+  metrics:
+  - name: health-check
+    interval: 10s
+    count: 3
+    successCondition: result == "OK"
+    failureLimit: 2
+    provider:
+      web:
+        url: "http://{{ args.service-url }}/healthz"
+        timeoutSeconds: 5
+        jsonPath: "{$.status}"
+  - name: readiness-check
+    interval: 10s
+    count: 3
+    successCondition: result == "OK"
+    failureLimit: 2
+    provider:
+      web:
+        url: "http://{{ args.service-url }}/readyz"
+        timeoutSeconds: 5
+        jsonPath: "{$.status}"

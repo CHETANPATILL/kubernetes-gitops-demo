@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  args:
+  - name: service-name
+  - name: namespace
+    value: rollouts-demo
+  metrics:
+  - name: success-rate
+    # Check every 30 seconds
+    interval: 30s
+    # Run 5 times (total: 2.5 minutes)
+    count: 5
+    # Success condition: rate >= 95%
+    successCondition: result >= 0.95
+    # Fail after 3 failures
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus-operated.monitoring.svc:9090
+        query: |
+          sum(
+            rate(
+              http_requests_total{
+                service="{{ args.service-name }}",
+                namespace="{{ args.namespace }}",
+                status!~"5.."
+              }[5m]
+            )
+          )
+          /
+          sum(
+            rate(
+              http_requests_total{
+                service="{{ args.service-name }}",
+                namespace="{{ args.namespace }}"
+              }[5m]
+            )
+          )
