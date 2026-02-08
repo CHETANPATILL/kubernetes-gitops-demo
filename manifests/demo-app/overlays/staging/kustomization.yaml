@@ -6,6 +6,9 @@ commonLabels:
   environment: staging
 bases:
   - ../../base
+images:
+  - name: ghcr.io/stefanprodan/podinfo
+    newTag: "6.5.4"
 patches:
   - target:
       kind: Deployment
