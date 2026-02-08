@@ -1,0 +1,54 @@
+{
+  "dashboard": {
+    "title": "ArgoCD Overview",
+    "tags": ["argocd", "gitops"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "Application Health",
+        "targets": [
+          {
+            "expr": "sum(argocd_app_info{health_status=\"Healthy\"}) by (namespace)",
+            "legendFormat": "Healthy"
+          },
+          {
+            "expr": "sum(argocd_app_info{health_status=\"Degraded\"}) by (namespace)",
+            "legendFormat": "Degraded"
+          },
+          {
+            "expr": "sum(argocd_app_info{health_status=\"Missing\"}) by (namespace)",
+            "legendFormat": "Missing"
+          }
+        ],
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "title": "Sync Status",
+        "targets": [
+          {
+            "expr": "sum(argocd_app_info{sync_status=\"Synced\"}) by (namespace)",
+            "legendFormat": "Synced"
+          },
+          {
+            "expr": "sum(argocd_app_info{sync_status=\"OutOfSync\"}) by (namespace)",
+            "legendFormat": "OutOfSync"
+          }
+        ],
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "title": "Sync Operations",
+        "targets": [
+          {
+            "expr": "rate(argocd_app_sync_total[5m])",
+            "legendFormat": "{{namespace}}/{{name}}"
+          }
+        ],
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+      }
+    ]
+  }
+}
