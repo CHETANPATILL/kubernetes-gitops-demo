@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform infrastructure and tools
+  
+  sourceRepos:
+  - '*'  # Allow all repos (platform team manages infrastructure)
+  
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+  
+  # Platform can deploy anything
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

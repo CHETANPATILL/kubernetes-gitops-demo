@@ -6,17 +6,14 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
-  
+  project: applications
   source:
     repoURL: git@github.com:CHETANPATILL/kubernetes-gitops-demo.git
     targetRevision: main
     path: manifests/demo-app/overlays/staging
-  
   destination:
     server: https://kubernetes.default.svc
     namespace: staging
-  
   syncPolicy:
     automated:
       prune: true

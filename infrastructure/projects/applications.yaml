@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: applications
+  namespace: argocd
+spec:
+  description: Application deployments (dev, staging, production)
+  
+  sourceRepos:
+  - 'https://github.com/CHETANPATILL/kubernetes-gitops-demo.git'
+  
+  destinations:
+  # Only allow deploying to app namespaces
+  - namespace: dev
+    server: https://kubernetes.default.svc
+  - namespace: staging
+    server: https://kubernetes.default.svc
+  - namespace: production
+    server: https://kubernetes.default.svc
+  
+  # Can't create cluster-wide resources
+  clusterResourceWhitelist: []
+  
+  # Limited to specific resource types
+  namespaceResourceWhitelist:
+  - group: 'apps'
+    kind: Deployment
+  - group: 'apps'
+    kind: ReplicaSet
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: 'networking.k8s.io'
+    kind: Ingress
