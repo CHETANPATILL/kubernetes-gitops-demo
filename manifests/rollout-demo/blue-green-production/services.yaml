@@ -1,0 +1,36 @@
+---
+# Active Service - Production Traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-active
+  labels:
+    app: web-app
+    service: active
+spec:
+  type: LoadBalancer  # Or ClusterIP if using Ingress
+  selector:
+    app: web-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 9898
+    protocol: TCP
+---
+# Preview Service - For Testing Green Version
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-preview
+  labels:
+    app: web-app
+    service: preview
+spec:
+  type: ClusterIP
+  selector:
+    app: web-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 9898
+    protocol: TCP

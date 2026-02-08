@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: web-app-production
+  labels:
+    app: web-app
+    environment: production
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+        environment: production
+    spec:
+      containers:
+      - name: web
+        image: ghcr.io/stefanprodan/podinfo:6.5.4
+        ports:
+        - containerPort: 9898
+          name: http
+        env:
+        - name: PODINFO_UI_COLOR
+          value: "#0000FF"  # Blue initially
+        - name: PODINFO_UI_MESSAGE
+          value: "Blue Version - Stable"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 9898
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 9898
+          initialDelaySeconds: 5
+          periodSeconds: 5
+  strategy:
+    blueGreen:
+      # Production traffic service
+      activeService: web-app-active
+      
+      # Preview/testing service
+      previewService: web-app-preview
+      
+      # Require manual promotion (safety for production)
+      autoPromotionEnabled: false
+      
+      # Keep blue running for 2 minutes after promotion (for quick rollback)
+      scaleDownDelaySeconds: 120
+      
+      # Abort on scale down (prevent accidental deletion)
+      abortScaleDownDelaySeconds: 30
+      
+      # Auto-promote after 10 minutes if not promoted manually
+      autoPromotionSeconds: 600
