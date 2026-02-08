@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: demo-app-dev
+  name: demo-app-staging
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: git@github.com:CHETANPATILL/kubernetes-gitops-demo.git
     targetRevision: main
-    path: manifests/demo-app/overlays/dev
+    path: manifests/demo-app/overlays/staging
   
   destination:
     server: https://kubernetes.default.svc
-    namespace: dev
+    namespace: staging
   
   syncPolicy:
     automated:
